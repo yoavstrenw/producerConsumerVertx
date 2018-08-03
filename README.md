@@ -27,4 +27,5 @@
 2.  consumer data should be stored in an another storge componenet , componenet need to be ACID supported  
 3.  tests , I didnt want to waste my time  ...
 4.  better logging 
+5.  inside the input handler septare the acctual line handling from the input (would provide more flexbilty to tests ) 
 
