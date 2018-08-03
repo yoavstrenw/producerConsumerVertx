@@ -1,23 +1,30 @@
-# producerConsumerVertx
-
-hi , 
-I choose to use vertx (this is the only framework i know , and not mastering , did a poc and a project). 
-
-# producer 
-run the generator (process ) , I am reading from this process output (blocking, i didn’t find a way to listen to this stream async , I am not mastering vertx and didn’t find how to do it in 2 hrs looking )
-flow
-1.validation 
-  its a valid object 
-  two similar object in the same time frame are duplication
-2.move the good events to consumers via event bus
-  typeCount
-  dataCount 
+# *ProducerConsumerVertx*
 
 
-# consumer
-listen to event bus async 
-persist the messages (to concurrent hash map increment count times )
+## Running the project 
+1.  inside the application.properties file change configuration : 
 
-# Api 
-rest api via vertx which goes and query the concurrent hash map for count 
+    1. cmd = location of execuatable  in the running env 
+    2. supportDuplication , choose if the system should be idempotent (based on assumption if events e1,e2 in t1 and there timestamp should be equal  )
+     
+2. build the project (from the directory pom.xml do mvn clean install )
+
+3. do java -jar producerConsumerVertx-1.2.4.RELEASE.jar 
+
+## Rest Api
+  rest api via vertx which goes and query the concurrent hash map for count  can be added by typing(GET method ... ) 
+
+1.   http://localhost:8080/v1/type/count/:id  e.g: http://localhost:8080/v1/type/count/foo
+2.   http://localhost:8080/v1/data/count/:id e.g: http://localhost:8080/v1/data/count/amet 
+
+
+# Things to improve : 
+
+1.  the data should be passed between producer and consumer via messagebroker such as rabbitmq or kafka  which will provide 
+    1.  persistence in case of server down
+    2.  monitoring how many messages are stack 
+    3.  provide distributed data center so we can scale out the services     
+2.  consumer data should be stored in an acid database (2 threads 1 reader and 1 writer , shared resource that should be saved )
+3.  tests , I didnt want to waste my time  ...
+4.  better logging 
 

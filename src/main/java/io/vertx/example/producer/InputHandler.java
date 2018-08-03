@@ -1,12 +1,6 @@
 package io.vertx.example.producer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.Observer;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.example.consumer.DataConsumer;
 import io.vertx.example.consumer.TypeConsumer;
@@ -14,10 +8,9 @@ import io.vertx.example.dto.PandaEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.wisdom.framework.vertx.AsyncInputStream;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,63 +20,31 @@ import java.util.Map;
 @Service
 @Slf4j
 public class InputHandler extends AbstractVerticle {
-    final Map<String, PandaEvent> currentTimestampEventsHashMap = new HashMap();
+    //only one thread does writing/reading
+    final Map<String, PandaEvent> currentTimestampEventsHashMap = new HashMap<>();
     final private ObjectMapper om = new ObjectMapper();
     @Value("${cmd}")
     String command;
+    @Value("${supportDuplication:false}")
+    private boolean supportDuplication;
     private PandaEvent lastPandaEvent = PandaEvent.builder().timestamp(0).build();
 
 
     public void start() throws Exception {
-
-        log.info("starting ");
-        Observable<String> observable = Observable.create(new ObservableOnSubscribe<String>() {
-            @Override
-            public void subscribe(ObservableEmitter<String> emitter) throws Exception {
-                Runtime r = Runtime.getRuntime();
-                String line;
-                Process p = r.exec(command);
-                log.debug("after process execution ");
-                BufferedReader is = new BufferedReader(new InputStreamReader(p.getInputStream()));
-                while ((line = is.readLine()) != null) {
-                    log.info("handling  " + line);
-                    emitter.onNext(line);
-                }
-                emitter.onComplete();
-            }
-        });
-        observable.subscribeOn(Schedulers.computation()).subscribe(new Observer<String>() {
-            @Override
-            public void onSubscribe(Disposable d) {
-
-            }
-
-            @Override
-            public void onNext(String s) {
-                lineHandler(s);
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                log.error(e.getMessage());
-            }
-
-            @Override
-            public void onComplete() {
-                log.info("ended processing .");
-            }
-        });
-
-
+        Runtime r = Runtime.getRuntime();
+        Process p = r.exec(command);
+        AsyncInputStream asyncInputStream = new AsyncInputStream(vertx, vertx.nettyEventLoopGroup(), p.getInputStream());
+        asyncInputStream.handler(buffer ->
+                lineHandler(buffer.getString(0, buffer.length() - 1))
+        );
     }
-
 
     private void lineHandler(String line) {
         PandaEvent currentPandaEvent = createPandaEvent(line);
         if (currentPandaEvent == null) {
             return;
         }
-        if (isDuplication(currentPandaEvent))
+        if (supportDuplication && isDuplication(currentPandaEvent))
             return;
 
         vertx.eventBus().send(TypeConsumer.TYPE,
@@ -106,12 +67,12 @@ public class InputHandler extends AbstractVerticle {
             currentTimestampEventsHashMap.clear();
             currentTimestampEventsHashMap.put(currentPandaEvent.getData(), currentPandaEvent);
         }
+        //only one event does this , so no sync problem
         lastPandaEvent = currentPandaEvent;
         return false;
     }
 
     private PandaEvent createPandaEvent(String line) {
-//        final JsonObject entries = new JsonObject(line);
         try {
             return om.readValue(line, PandaEvent.class);
         } catch (IOException e) {

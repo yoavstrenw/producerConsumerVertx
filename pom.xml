@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <parent>
@@ -12,18 +12,26 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>springboot-example</artifactId>
+  <artifactId>producerConsumerVertx</artifactId>
 
 
   <properties>
     <vertx.version>3.5.3</vertx.version>
     <java.version>1.8</java.version>
+    <wisdomVertxEngin.version>0.10.0</wisdomVertxEngin.version>
+
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-tomcat</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
@@ -35,17 +43,6 @@
       <artifactId>vertx-web</artifactId>
       <version>${vertx.version}</version>
     </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-reactive-streams</artifactId>
-      <version>${vertx.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.netflix.rxjava</groupId>
-      <artifactId>rxjava-core</artifactId>
-      <version>0.20.7</version>
-    </dependency>
 
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -54,23 +51,12 @@
       <scope>provided</scope>
     </dependency>
 
-    <!--<dependency>-->
-      <!--<groupId>org.wisdom-framework</groupId>-->
-      <!--<artifactId>wisdom-vertx-engine</artifactId>-->
-      <!--<version>0.10.0</version>-->
-    <!--</dependency>-->
-
     <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-rx-java</artifactId>
-      <version>3.5.3</version>
+      <groupId>org.wisdom-framework</groupId>
+      <artifactId>wisdom-vertx-engine</artifactId>
+      <version>${wisdomVertxEngin.version}</version>
     </dependency>
 
-    <dependency>
-      <groupId>io.reactivex.rxjava2</groupId>
-      <artifactId>rxjava</artifactId>
-      <version>2.2.0</version>
-    </dependency>
 
 
   </dependencies>
@@ -99,16 +85,5 @@
     </plugins>
   </build>
 
-  <profiles>
-    <profile>
-      <id>staging</id>
-      <repositories>
-        <repository>
-          <id>staging</id>
-          <url>https://oss.sonatype.org/content/repositories/iovertx-3783/</url>
-        </repository>
-      </repositories>
-    </profile>
-  </profiles>
 
 </project>
