@@ -23,8 +23,8 @@
 1.  the data should be passed between producer and consumer via messagebroker such as rabbitmq or kafka  which will provide 
     1.  persistence in case of server down
     2.  monitoring how many messages are stack 
-    3.  provide distributed data center so we can scale out the services     
-2.  consumer data should be stored in an acid database (2 threads 1 reader and 1 writer , shared resource that should be saved )
+    3.  provide distributed data center so we can scale out the consumers if needed      
+2.  consumer data should be stored in an another storge componenet , componenet need to be ACID supported  
 3.  tests , I didnt want to waste my time  ...
 4.  better logging 
 
