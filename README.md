@@ -18,14 +18,3 @@
 2.   http://localhost:8080/v1/data/count/:id e.g: http://localhost:8080/v1/data/count/amet 
 
 
-# Things to improve : 
-
-1.  the data should be passed between producer and consumer via messagebroker such as rabbitmq or kafka  which will provide 
-    1.  persistence in case of server down
-    2.  monitoring how many messages are stack 
-    3.  provide distributed data center so we can scale out the consumers if needed      
-2.  consumer data should be stored in an another storge componenet , componenet need to be ACID supported  
-3.  tests , I didnt want to waste my time  ...
-4.  better logging 
-5.  inside the input handler septare the acctual line handling from the input (would provide more flexbilty to tests ) 
-
